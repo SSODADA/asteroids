@@ -1111,8 +1111,6 @@ $(function () {
   extraDude.children = [];
 
   var i, j = 0;
-
-  var paused = false;
   var showFramerate = false;
   var avgFramerate = 0;
   var frameCount = 0;
@@ -1122,22 +1120,6 @@ $(function () {
   var thisFrame;
   var elapsed;
   var delta;
-
-  var canvasNode = canvas[0];
-
-  // shim layer with setTimeout fallback
-  // from here:
-  // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-  window.requestAnimFrame = (function () {
-    return  window.requestAnimationFrame       ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            window.oRequestAnimationFrame      ||
-            window.msRequestAnimationFrame     ||
-            function (/* function */ callback, /* DOMElement */ element) {
-              window.setTimeout(callback, 1000 / 60);
-            };
-  })();
 
   var mainLoop = function () {
     context.clearRect(0, 0, Game.canvasWidth, Game.canvasHeight);
@@ -1199,15 +1181,10 @@ $(function () {
       avgFramerate = frameCount;
       frameCount = 0;
     }
-
-    if (paused) {
-      Text.renderText('PAUSED', 72, Game.canvasWidth/2 - 160, 120);
-    } else {
-      requestAnimFrame(mainLoop, canvasNode);
-    }
   };
 
-  mainLoop();
+  var frameInterval = 25;
+  var mainLoopId = setInterval(mainLoop, frameInterval);
 
   $(window).keydown(function (e) {
     switch (KEY_CODES[e.keyCode]) {
@@ -1215,11 +1192,13 @@ $(function () {
         showFramerate = !showFramerate;
         break;
       case 'p': // pause
-        paused = !paused;
-        if (!paused) {
-          // start up again
+        if (mainLoopId) {
+          clearInterval(mainLoopId);
+          mainLoopId = null;
+          Text.renderText('PAUSED', 72, Game.canvasWidth/2 - 160, 120);
+        } else {
           lastFrame = Date.now();
-          mainLoop();
+          mainLoopId = setInterval(mainLoop, frameInterval);
         }
         break;
       case 'm': // mute
