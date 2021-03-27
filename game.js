@@ -1183,8 +1183,7 @@ $(function () {
     }
   };
 
-  var frameInterval = 25;
-  var mainLoopId = setInterval(mainLoop, frameInterval);
+  var mainLoopId = setInterval(mainLoop, 25);
 
   $(window).keydown(function (e) {
     switch (KEY_CODES[e.keyCode]) {
@@ -1198,7 +1197,7 @@ $(function () {
           Text.renderText('PAUSED', 72, Game.canvasWidth/2 - 160, 120);
         } else {
           lastFrame = Date.now();
-          mainLoopId = setInterval(mainLoop, frameInterval);
+          mainLoopId = setInterval(mainLoop, 10);
         }
         break;
       case 'm': // mute
